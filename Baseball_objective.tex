@@ -1,0 +1,103 @@
+%--------------------
+% Packages
+% -------------------
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8x]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{ragged2e}
+%\usepackage{gentium}
+\usepackage{mathptmx} % Use Times Font
+
+\makeatletter
+\newcommand\footnoteref[1]{\protected@xdef\@thefnmark{\ref{#1}}\@footnotemark}
+\makeatother
+
+\usepackage{sectsty} 
+
+\sectionfont{\fontsize{14}{12}\selectfont}
+\subsectionfont{\fontsize{12}{12}\selectfont}
+
+\usepackage[pdftex]{graphicx} % Required for including pictures
+\usepackage[swedish]{babel} % Swedish translations
+\usepackage[pdftex,linkcolor=black,pdfborder={0 0 0}]{hyperref} % Format links for pdf
+\usepackage{calc} % To reset the counter in the document after title page
+\usepackage{enumitem} % Includes lists
+
+\frenchspacing % No double spacing between sentences
+\linespread{1} % Set linespace
+\usepackage[a4paper, lmargin=0.09\paperwidth, rmargin=0.09\paperwidth, tmargin=0.07\paperheight, bmargin=0.06\paperheight]{geometry} %margins
+%\usepackage{parskip}
+
+\usepackage[all]{nowidow} % Tries to remove widows
+\usepackage[protrusion=true,expansion=true]{microtype} % Improves typography, load after fontpackage is selected
+
+\usepackage{lipsum} % Used for inserting dummy 'Lorem ipsum' text into the template
+\title{Statement of Purpose}
+
+%-----------------------
+% Set pdf information and add title, fill in the fields
+%-----------------------
+\hypersetup{ 	
+pdfsubject = {},
+pdftitle = {},
+pdfauthor = {}
+}
+\begin{document}
+%\maketitle
+%\centerline{\textbf{\large{Statement of Purpose}}}
+%\vspace{1mm}
+%\centerline{\textit{\large Gaurav Bhatt}}
+%\vspace{2mm}
+\section{Problem Statement}
+The problem focuses on estimating the optimal radius for the ball in a given video frame. The video footage has a pitcher throwing the ball and the goal is to estimate the spin of the ball. We have developed an interface that shows the ball to a user and asks them to click on the centre of the ball, denoted by $\tilde{c}$. We predict the trajectory of the ball based on these points that are clicked by the user 
+\section{Assumptions}
+We make the following assumptions about the problem.\\
+1. Initially we assume that the we already know the centre of the ball. Formally,\\ 
+$|c-\tilde{c}|=0$\\
+where $c$ is the centre of the ball and $\tilde{c}$ is the pixel in the image which is clicked by the user.\\
+2. The radius of the ball at a given frame $t$, denoted by $r_t$ grows linearly with respect to the frames. Formally, \\
+$r_t= \alpha r_{t-1}$ , where $\alpha \geq 1$\\
+3. The pixel intensity of the ball remains roughly the same for different frames. For a given frame $t$ with centre and radius $(c_t,r_t)$. We assume that that pixel intensity of the ball will be similar to its previous frames $\{t-1,t-2,t-3....,0 \}$ with centres and radii at $\{(c_{t-1},r_{t-1}),(c_{t-2},r_{t-2}),.....,(c_{0},r_{0})\}$. 
+We use image histograms to compare pixel similarity between . The notation $H(c_t,r_t)$ denotes the histogram of all pixels in frame $t$  that lie inside a circle with radius $r$ and centre $c$. 
+\section {Decision Variables}
+
+Since we assume that the centre of the ball is already known. Our, decision variable in this case will only be the radius of the ball $r_t$ at a given frame $t$. The objective function can either maximize or minimize the decision variable. In our case we would like to maximize the radius of the ball. The reason behind choosing this objective is that minimizing the radius of the ball can lead to detecting a circle that is much smaller than the size of the ball with the aforementioned assumptions being true. Our decision objective should also take assumption 3 into consideration and ensure that the histogram of pixel intensity of the ball for a given frame is similar to the histogram of pixel intensity of the ball in the previous frame. We can use euclidean distance as a metric to measure the similarity between the two histograms.% We would also want the the centre of the ball $c_t$ to be as close to the predicted centre of the ball $\tilde{c_t}$ 
+%\section {Constraints}
+%1. $r_t$>0\\
+%2. $r_t= \alpha r_{t-1}$ ,\\
+%3. $||H(r_t,c_t)-H(r_{t-1},c_{t-1})||_2 \leq \epsilon$\\.
+
+
+%Here the second constraint assumes that the radius is growing linearly. The third constraint focuses on the similarity of the pixels of the ball. We assume that the l-2 norm of color histograms for two consecutive frames of the ball should be less than a threshold $\epsilon$ , whose value can be controlled manually.
+
+
+\section {Objective Function}
+The objective function is given as 
+
+%$\min\limits_{\{c_1,c_2,.c_n,\}\{r_1,r_2,...r_n\}} \hspace{0.5} \sum\limits_{i=1}\limits^n \{\lambda_1|c_i-\tilde{c_i}|\ +\lambda_3|H(r_i,c_i)-H(r_{i-1},c_{i-1})||_2-\lambda_3r_i \}$ \\
+$\min\limits_{r_0} \hspace{0.5} \sum\limits_{i=0}\limits^n \{ \lambda_1||H(\alpha^ir_0,c_i)- S_{i}||_2-\lambda_2\alpha^ir_0\}$ \\
+\\subject to \\
+$r_0>0$\\
+$r_t= \alpha r_{t-1}$  where $\alpha>1$\\
+Here, $S_i = \frac {1}{i-1}\sum\limits_{k=0}\limits^{i-1} H_k(\alpha^kr_0,c_k)$  \\
+ $S_i$ is the mean value of all color histgograms prior to frame $i$. The objective function is defined for all set of frames till the present frame $n$. Here, $\lambda_1 $and $\lambda_2$ are the associated weights, that can be tuned manually. The the objective function associated with $\lambda_1$ tries to minimize the euclidean distances of histograms of the current frame and the mean color histogram of all previous frames. The optimization objective ensures that the pixel intensity of the ball remains the same and the offset while tracking the ball is minimized and also  the objective function associated with $\lambda_2$ tries to ensure that the radius is not zero.
+ 
+ \section {Extensions}
+ We can also add a texture based descriptor to denote the shape of the ball. 
+%\subsection {Relaxing assumption 1 }
+%We now relax assumption 1 and assume that that the centre of the ball is not known.Hence, the centre of the ball $c_t$ also becomes a decision variable the objective function is now given as \\
+%$Obj$=$min_{r_t,c_t}(\lambda_1|c_t-\tilde{c_t}|-\lambda_2r_t)$, 
+%\\where $\lambda_1$ and$\lamda_2$ are tuned manually.
+
+
+
+
+
+
+
+
+
+
+
+
+\end{document}
